@@ -1,0 +1,44 @@
+name: k6 Performance Tests
+
+on:
+  push:
+    branches:
+      - main  # Executa o workflow quando houver push na branch main
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Faz checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Configura o Node.js (necessário para o k6-html-reporter)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # 3. Instala o k6 e o k6-html-reporter
+      - name: Install k6 and k6-html-reporter
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+          npm install -g k6-html-reporter
+
+      # 4. Executa o teste do k6 e gera o relatório HTML
+      - name: Run k6 tests and generate HTML report
+        run: |
+          mkdir -p results
+          k6 run --out json=results/k6-results.json scripts/teste.js
+          k6-html-reporter results/k6-results.json
+
+      # 5. Publica o relatório no GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./report  # Pasta onde o k6-html-reporter gera o relatório
