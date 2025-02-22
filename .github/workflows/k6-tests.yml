@@ -33,7 +33,7 @@ jobs:
       - name: Run k6 tests and generate HTML report
         run: |
           mkdir -p results
-          k6 run --out json=results/k6-results.json scripts/teste.js
+          k6 run --out json=results/k6-results.json scripts/scriptAuth.js
           k6-html-reporter results/k6-results.json
 
       # 5. Publica o relatório no GitHub Pages
